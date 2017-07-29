@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Clients</title>
+</h:head>
+<h:body>
+	<!-- Tab Menu -->
+	<p:tabMenu activeIndex="#{param.i}" style="margin-bottom:5px;">
+		<p:menuitem value="Clients" outcome="client" icon="ui-icon-person" 
+					style="background-color:#ffa64d;">
+			<f:param name="i" value="0" />
+		</p:menuitem>
+		<p:menuitem value="Rapport bug" outcome="rapportBug" icon="ui-icon-wrench" 
+					style="background-color:#ffa64d;">
+			<f:param name="i" value="1" />
+		</p:menuitem>
+	</p:tabMenu>
+
+	<!-- Message Display -->
+	<p:growl id="messages" />
+
+	<!-- 	Table Client -->
+	<h:form id="operations">
+		<p:dataTable id="clientTable" var="c" value="#{clientBean.clients}"
+					resizableColumns="true" style="margin-bottom:10px;font-size:90%">
+
+			<f:facet name="header">Liste Client</f:facet>
+
+			<p:column headerText="Statut" sortBy="#{c.statutClient}" width="50">
+				<h:graphicImage rendered="#{c.statutClient eq 'true'}"
+								value="/images/status_true.png" style="margin-left:10px;" />
+				<h:graphicImage rendered="#{c.statutClient eq 'false'}"
+								value="/images/status_false.png" style="margin-left:10px;" />
+			</p:column>
+
+			<p:column headerText="Nom" sortBy="#{c.nom}" width="100">
+				<h:outputText value="#{c.nom}" />
+			</p:column>
+
+			<p:column headerText="Prénom" sortBy="#{c.prenom}" width="100">
+				<h:outputText value="#{c.prenom}" />
+			</p:column>
+
+			<p:column headerText="Adresse Facturation" sortBy="#{c.adresseFact}" width="180">
+				<h:outputText value="#{c.adresseFact} " />
+				<h:outputText value="#{c.complAdresseFact}" /><br/>
+				<h:outputText value="#{c.cpFact} " />
+				<h:outputText value="#{c.villeFact}" />
+			</p:column>
+
+			<p:column headerText="Adresse Chantier" sortBy="#{c.adresseChantier}" width="180">
+				<h:outputText value="#{c.adresseChantier} " />
+				<h:outputText value="#{c.complAdresseChantier}" /><br/>
+				<h:outputText value="#{c.cpChantier} " />
+				<h:outputText value="#{c.villeChantier}" />
+			</p:column>
+
+			<p:column headerText="E-mail" sortBy="#{c.email}">
+				<h:outputText value="#{c.email}" />
+			</p:column>
+
+			<p:column headerText="N° Tél" sortBy="#{c.numTel}" width="80">
+				<h:outputText value="#{c.numTel}" />
+			</p:column>
+
+			<p:column headerText="Consulter" width="100" resizable="false">
+				<p:commandButton value="Consulter" action="#{clientBean.consulterClient(c)}"
+								style="background-color:#00b300;" />
+			</p:column>
+
+			<p:column headerText="Modifier" width="90" resizable="false">
+				<p:commandButton value="Modifier" action="#{clientBean.setClient2(c)}" onclick="PF('dlg1').show();"
+								update=":updateForm" resetValues="true" style="background-color:#ff6600;font-size:90%;" />
+			</p:column>
+
+			<p:column headerText="Supprimer" width="105" resizable="false">
+				<p:commandButton value="Supprimer" action="#{clientBean.deleteClient(c)}"
+								update="clientTable, :messages" style="background-color:#ff1a1a;">
+					<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+				</p:commandButton>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" style="font-size:90%;">
+					<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</p:confirmDialog>
+			</p:column>
+
+		</p:dataTable>
+
+		<p:commandButton value="Ajouter Client" type="button" onclick="PF('dlg2').show();" style="margin-left:40px;" />
+	</h:form>
+
+	<!-- formulaire add Client -->
+	<p:dialog header="Créer client" widgetVar="dlg2" modal="true" height="550" width="570" 
+			closeOnEscape="true" style="font-size:90%;">
+		<h:form id="addForm">
+			<p:selectOneMenu id="civilite" value="#{clientBean.client3.civilite}" styleClass="menu" 
+							panelStyleClass="panel" style="margin-top:5px;margin-left:5px;">
+            		<f:selectItem itemLabel="Civilité" itemValue="" />
+					<f:selectItem itemLabel="M." itemValue="M." />
+					<f:selectItem itemLabel="Mme/Mlle" itemValue="Mme/Mlle" />
+			</p:selectOneMenu>
+
+			<h:panelGrid columns="4" cellpadding="5" style="margin-top:10px;">
+				<p:outputLabel for="nom" value="Nom :" />
+				<p:inputText id="nom" value="#{clientBean.client3.nom}" required="true" />
+
+				<p:outputLabel for="prenom" value="Prénom :" />
+				<p:inputText id="prenom" value="#{clientBean.client3.prenom}" required="true" />
+			</h:panelGrid>
+		<!-- Field Adresse facturation -->
+			<p:fieldset legend="Adresse Facturation" style="margin-bottom:15px; margin-top:10px; 
+						font-size:90%;">
+				<h:panelGrid columns="2" cellpadding="5">
+					<p:outputLabel for="adresseFacturation" value="Numéro et rue :" />
+					<p:inputText id="adresseFacturation" size="40" 
+								value="#{clientBean.client3.adresseFact}" />
+
+					<p:outputLabel for="complAdresseFact" value="Complément d'adresse :" />
+					<p:inputText id="complAdresseFact" placeholder="bat,appt"
+								value="#{clientBean.client3.complAdresseFact}" />
+				</h:panelGrid>
+				<h:panelGrid columns="5" cellpadding="5">
+					<p:outputLabel for="cpFact" value="Code Postal :" />
+					<p:inputText id="cpFact" size="5" style="margin-right:35px"
+								value="#{clientBean.client3.cpFact}" />
+
+					<p:outputLabel for="villeFact" value="Ville :" />
+					<p:inputText id="villeFact" value="#{clientBean.client3.villeFact}" />
+				</h:panelGrid>
+			</p:fieldset>
+
+		<!-- Field Adresse chantier -->
+			<p:fieldset legend="Adresse Chantier" style="margin-bottom:15px; font-size:90%;">
+				<h:panelGrid columns="2" cellpadding="5">
+					<p:outputLabel for="adresseChantier" value="Numéro et rue :" />
+					<p:inputText id="adresseChantier" size="40"
+								value="#{clientBean.client3.adresseChantier}" />
+
+					<p:outputLabel for="complAdresseChantier" value="Complément d'adresse :" />
+					<p:inputText id="complAdresseChantier" placeholder="bat,appt"
+								value="#{clientBean.client3.complAdresseChantier}" />
+				</h:panelGrid>
+				<h:panelGrid columns="4" cellpadding="5">
+					<p:outputLabel for="cpChantier" value="Code Postal :" />
+					<p:inputText id="cpChantier" size="5" value="#{clientBean.client3.cpChantier}" 
+								style="margin-right:35px" />
+
+					<p:outputLabel for="villeChantier" value="Ville :" />
+					<p:inputText id="villeChantier" value="#{clientBean.client3.villeChantier}" />
+				</h:panelGrid>
+			</p:fieldset>
+
+			<h:panelGrid columns="4" cellpadding="5">
+				<p:outputLabel for="email" value="E-mail :" />
+				<p:inputText id="email" size="25" value="#{clientBean.client3.email}" />
+
+				<p:outputLabel for="numTel" value="N° Tel :" />
+				<p:inputText id="numTel" size="15" value="#{clientBean.client3.numTel}" />
+			</h:panelGrid>
+
+			<p:commandButton value="Créer" action="#{clientBean.createClient}"
+							update="addForm, :messages, :operations"
+							oncomplete="handleDialogSubmit(args,'dlg2');"
+							style="margin-left:100px; margin-top:10px; background-color:#00b300;" />
+
+		</h:form>
+	</p:dialog>
+
+	<!-- formulaire update Client -->
+	<p:dialog header="Modifier client" widgetVar="dlg1" modal="true" height="550" width="570" 
+			closeOnEscape="true" style="font-size:90%;">
+		<h:form id="updateForm">
+			<p:selectOneMenu id="civilite" value="#{clientBean.client2.civilite}" styleClass="menu" 
+							panelStyleClass="panel" style="margin-top:5px;margin-left:5px;">
+            		<f:selectItem itemLabel="Civilité" itemValue="" />
+					<f:selectItem itemLabel="M." itemValue="M." />
+					<f:selectItem itemLabel="Mme/Mlle" itemValue="Mme/Mlle" />
+			</p:selectOneMenu>
+
+			<h:panelGrid columns="4" cellpadding="5">
+				<p:outputLabel for="nom" value="Nom :" />
+				<p:inputText id="nom" value="#{clientBean.client2.nom}" required="true" />
+
+				<p:outputLabel for="prenom" value="Prénom :" />
+				<p:inputText id="prenom" value="#{clientBean.client2.prenom}" required="true" />
+			</h:panelGrid>
+			
+		<!-- Field Adresse facturation -->
+			<p:fieldset legend="Adresse Facturation" style="margin-bottom:15px; margin-top:10px; 
+						font-size:90%;">
+				<h:panelGrid columns="2" cellpadding="5">
+					<p:outputLabel for="adresseFacturation" value="Numéro et rue :" />
+					<p:inputText id="adresseFacturation" size="40" value="#{clientBean.client2.adresseFact}" />
+
+					<p:outputLabel for="complAdresseFact" value="Complément d'adresse :" />
+					<p:inputText id="complAdresseFact" placeholder="bat,appt"
+								value="#{clientBean.client2.complAdresseFact}" />
+				</h:panelGrid>
+				<h:panelGrid columns="5" cellpadding="5">
+					<p:outputLabel for="cpFact" value="Code Postal :" />
+					<p:inputText id="cpFact" size="5" style="margin-right:35px"
+								value="#{clientBean.client2.cpFact}" />
+
+					<p:outputLabel for="villeFact" value="Ville :" />
+					<p:inputText id="villeFact" value="#{clientBean.client2.villeFact}" />
+				</h:panelGrid>
+			</p:fieldset>
+
+		<!-- Field Adresse Chantier -->
+			<p:fieldset legend="Adresse Chantier" style="margin-bottom:15px; font-size:90%;">
+				<h:panelGrid columns="2" cellpadding="5">
+					<p:outputLabel for="adresseChantier" value="Numéro et rue :" />
+					<p:inputText id="adresseChantier" size="40"
+								value="#{clientBean.client2.adresseChantier}" />
+
+					<p:outputLabel for="complAdresseChantier" value="Complément d'adresse :" />
+					<p:inputText id="complAdresseChantier" placeholder="bat,appt"
+								value="#{clientBean.client2.complAdresseChantier}" />
+				</h:panelGrid>
+				<h:panelGrid columns="4" cellpadding="5">
+					<p:outputLabel for="cpChantier" value="Code Postal :" />
+					<p:inputText id="cpChantier" size="5" value="#{clientBean.client2.cpChantier}" 
+								style="margin-right:35px" />
+
+					<p:outputLabel for="villeChantier" value="Ville :" />
+					<p:inputText id="villeChantier" value="#{clientBean.client2.villeChantier}" />
+				</h:panelGrid>
+			</p:fieldset>
+
+			<h:panelGrid columns="4" cellpadding="5">
+				<p:outputLabel for="email" value="E-mail :" />
+				<p:inputText id="email" size="25" value="#{clientBean.client2.email}" />
+
+				<p:outputLabel for="numTel" value="N° Tel :" />
+				<p:inputText id="numTel" size="15" value="#{clientBean.client2.numTel}" />
+			</h:panelGrid>
+			
+				<p:commandButton value="Modifier" action="#{clientBean.updateClient}"
+					update="updateForm, :messages, :operations"
+					oncomplete="handleDialogSubmit(args,'dlg1');"
+					style="margin-left:100px; background-color:#ff6600; margin-top:10px;" />
+		</h:form>
+	</p:dialog>
+
+	<script type="text/javascript">
+		function handleDialogSubmit(args, dialogName) {
+			if (!args.validationFailed) {
+				PF(dialogName).hide();
+			}
+		}
+	</script>
+<style>
+.ui-button {
+	font-size: 90%;
+}
+
+.menu .ui-selectonemenu-label {
+	font-size: 90%;
+}
+
+.panel .ui-selectonemenu-list {
+	font-size: 90%;
+}
+</style>
+</h:body>
+</html>

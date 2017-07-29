@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Détails Factures</title>
+</h:head>
+<h:body>
+<!-- menu -->
+<p:tabMenu activeIndex="#{param.i}">
+    <p:menuitem value="Liste clients" outcome="client" icon="ui-icon-person" style="background-color:#ffa64d;">
+        <f:param name="i" value="0" />
+    </p:menuitem>
+    <p:menuitem value="Liste Factures" outcome="consulterClient" icon="ui-icon-document" 
+    			style="background-color:#ffa64d;">
+        <f:param name="i" value="1" />
+    </p:menuitem>
+    <p:menuitem value="Rapport bug" outcome="rapportBug" icon="ui-icon-wrench" style="background-color:#ffa64d;">
+        <f:param name="i" value="2" />
+    </p:menuitem>
+</p:tabMenu>
+
+<h4>Facture : <h:outputText value="#{factGBean.factureGlobal}" /></h4>
+
+<!-- message display -->
+<p:growl id="messages" />
+
+<!-- 	Table liste Facture Détaillé -->
+<h:form id="operations">
+	<p:dataTable id="factTable" var="f" value="#{factMBean.listFactM}" 
+				 resizableColumns="true" style="margin-bottom:20px; font-size:90%;">
+				 
+		<f:facet name="header">Liste Factures</f:facet>
+		
+		<p:column headerText="Statut" sortBy="#{f.statutFactMois}" width="60">
+        	<h:graphicImage rendered="#{f.statutFactMois eq 'true'}" value="/images/status_true.png" 
+        					style="margin-left:10px;" />
+       		<h:graphicImage rendered="#{f.statutFactMois eq 'false'}" value="/images/status_false.png" 
+       						style="margin-left:10px;" />
+    	</p:column>
+    	
+    	<p:column headerText="Date création" sortBy="#{f.dateCreation}">
+        	<h:outputText value="#{factMBean.onDateInput(f.dateCreation)}" />
+    	</p:column>
+ 
+    	<p:column headerText="Ref Facture" sortBy="#{f.refFactMois}">
+        	<h:outputText value="#{f.refFactMois}" />
+    	</p:column>
+ 
+    	<p:column headerText="Montant Facture" sortBy="#{f.montantFacture}">
+        	<h:outputText value="#{f.montantFacture}" />
+    	</p:column>
+ 
+    	<p:column headerText="Règlement" sortBy="#{f.reglement}">
+        	<h:outputText value="#{f.reglement}" />
+    	</p:column>
+		
+		<p:column headerText="Ajouter réglement" width="188">
+        	<p:commandButton value="Ajouter réglement" action="#{factMBean.valueFactM(f)}" 
+        				 	 update=":addFactForm" />
+    	</p:column>
+		
+    	<p:column headerText="Supprimer" width="125">
+        	<p:commandButton value="Supprimer" action="#{factMBean.deleteFactM(f)}" 
+        				 	 update="factTable, :messages, :operations">
+        	<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+        	</p:commandButton>
+        	<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" style="font-size:90%;">
+        		<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+        						 icon="ui-icon-check" />
+        		<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+        						 icon="ui-icon-close" />
+			</p:confirmDialog>
+    	</p:column>
+    	
+    	<f:facet name="footer">
+    		<h:panelGrid columns="2" cellpadding="5">
+    		<h:outputText value="Montant Facturé: #{factGBean.factureGlobal.montantTTC}€"/>
+    		<h:outputText value="Total règlement: #{factGBean.somme}€" />
+    		</h:panelGrid>
+    	</f:facet>
+   
+</p:dataTable>
+</h:form>
+
+<h:form>
+<h:panelGrid columns="2" cellpadding="5">
+	<h:outputText />	
+	<p:commandButton value="Obtenir valeurs Facture" action="#{factMBean.valueFactG}" update=":addFactForm" resetValues="true" />
+</h:panelGrid>
+</h:form>
+
+<!-- formulaire add Facture Détaillé -->
+<h:form id="addFactForm">
+<p:focus />
+	<h:panelGrid columns="2" cellpadding="5" style="font-size:90%;">
+		<f:facet name="header">Création Devis</f:facet>
+		<p:outputLabel for="ref" value="Ref Facture :" />
+		<p:inputText id="ref" value="#{factMBean.factureMois.refFactMois}" />
+		
+		<p:outputLabel for="event" value="Date création :" />
+        <p:calendar id="event" value="#{factMBean.date}">
+            <p:ajax event="dateSelect" listener="#{factMBean.onDateSelect}" update="event" />
+        </p:calendar>
+		
+		<p:outputLabel for="MontantFacture" value="Montant TTC :" />
+		<p:inputText id="MontantFacture" value="#{factMBean.factureMois.montantFacture}" />
+		
+		<p:outputLabel for="reglement" value="Règlement :" />
+		<p:inputText id="reglement" value="#{factMBean.factureMois.reglement}" />
+
+		<p:commandButton value="Créer" action="#{factMBean.createFactM}" 
+						 update="addFactForm, :messages, :operations" />
+		<p:commandButton value="Ajouter réglement" action="#{factMBean.addReglement}" 
+						 update="addFactForm, :messages, :operations" />
+	</h:panelGrid>
+</h:form>
+
+	<style>
+		.ui-button{
+            font-size:90%;
+        }
+	</style>
+</h:body>
+</html>

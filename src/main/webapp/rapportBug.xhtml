@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Rapport bug</title>
+</h:head>
+<h:body>
+
+	<!-- menu -->
+	<p:tabMenu activeIndex="#{param.i}">
+		<p:menuitem value="Clients" outcome="client"
+			icon="ui-icon-person" style="background-color:#ffa64d;">
+			<f:param name="i" value="0" />
+		</p:menuitem>
+		<p:menuitem value="Rapport bug" outcome="rapportBug"
+			icon="ui-icon-wrench" style="background-color:#ffa64d;">
+			<f:param name="i" value="1" />
+		</p:menuitem>
+	</p:tabMenu>
+
+	<!-- message display -->
+	<p:growl id="messages" />
+
+	<!-- 	Table liste Client -->
+	<h:form id="operations">
+		<p:dataTable id="bugTable" var="b" value="#{bugBean.allBug}" resizableColumns="true" 
+					style="margin-bottom:20px; margin-bottom:20px; font-size:90%;">
+
+			<f:facet name="header">Liste Bugs</f:facet>
+
+			<p:column headerText="Date Création" sortBy="#{b.dateCreation}" width="120">
+				<h:outputText value="#{b.dateCreation}" />
+			</p:column>
+
+			<p:column headerText="Description" sortBy="#{b.descriptionBug}">
+				<h:outputText value="#{b.descriptionBug}" />
+			</p:column>
+
+			<p:column headerText="Modifier" width="130">
+				<p:commandButton value="Obtenir valeur" action="#{bugBean.setBug(b)}" update=":addForm" />
+			</p:column>
+			<p:column headerText="Supprimer" width="105">
+				<p:commandButton value="Supprimer" action="#{bugBean.delete(b)}" update="bugTable, :messages">
+					<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+				</p:commandButton>
+
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+									icon="ui-icon-check" />
+					<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+									icon="ui-icon-close" />
+				</p:confirmDialog>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+
+	<!-- formulaire add Bug -->
+	<h:form id="addForm">
+		<p:focus />
+		<h:panelGrid columns="2" cellpadding="5">
+			<f:facet name="header"> Création / Modification Bugs</f:facet>
+
+			<p:outputLabel for="desc" value="Description :" />
+			<p:inputTextarea rows="6" cols="33" id="desc" value="#{bugBean.bug.descriptionBug}" />
+		</h:panelGrid>
+
+		<h:panelGrid columns="2" cellpadding="5" style="margin-left:140px;">
+			<p:commandButton value="Ajouter" action="#{bugBean.create}"
+							update="addForm, :messages, :operations" />
+			<p:commandButton value="Modifier" action="#{bugBean.update}"
+							update="addForm, :messages, :operations" />
+		</h:panelGrid>
+	</h:form>
+
+	<style>
+		.ui-button {
+		font-size: 90%;
+		}
+	</style>
+</h:body>
+</html>

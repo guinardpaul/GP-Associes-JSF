@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Détails Factures</title>
+</h:head>
+<h:body>
+<!-- Tab menu -->
+<p:tabMenu activeIndex="#{param.i}">
+    <p:menuitem value="Clients" outcome="client" icon="ui-icon-person" style="background-color:#ffa64d;">
+        <f:param name="i" value="0" />
+    </p:menuitem>
+    <p:menuitem value="Devis / Factures" outcome="consulterClient" icon="ui-icon-document" 
+    			style="background-color:#ffa64d;">
+        <f:param name="i" value="1" />
+    </p:menuitem>
+    <p:menuitem value="Rapport bug" outcome="rapportBug" icon="ui-icon-wrench" style="background-color:#ffa64d;">
+        <f:param name="i" value="2" />
+    </p:menuitem>
+</p:tabMenu>
+
+<h4>Facture : <h:outputText value="#{factGBean.factureGlobal}" /></h4>
+
+<!-- message display -->
+<p:growl id="messages" />
+
+<!-- 	Table liste Facture Mois -->
+<h:form id="operations">
+	<p:dataTable id="factTable" var="f" value="#{factMBean.listFactM}" 
+				 resizableColumns="true" style="margin-bottom:20px; font-size:90%;">
+				 
+		<f:facet name="header">Factures d'acomptes - situation</f:facet>
+		
+    	<p:column headerText="Date création" sortBy="#{f.dateCreation}" width="120">
+        	<h:outputText value="#{factMBean.onDateInput(f.dateCreation)}" />
+    	</p:column>
+ 
+    	<p:column headerText="Ref Facture" sortBy="#{f.refFactMois}">
+        	<h:outputText value="#{f.refFactMois}" />
+    	</p:column>
+ 
+    	<p:column headerText="Montant Facture TTC €" sortBy="#{f.montantFacture}">
+        	<h:outputText value="#{f.montantFacture}" />
+    	</p:column>
+ 
+    	<p:column headerText="Règlement TTC €" sortBy="#{factMBean.reglementClient(f)}">
+        	<h:outputText value="#{f.getReglementClient(f)}" />
+    	</p:column>
+		
+	<!-- 	<p:column headerText="Ajouter réglement" width="160" resizable="false">
+        	<p:commandButton value="Ajouter réglement" action="#{factMBean.valueFactM(f)}" 
+        				 	 onclick="PF('dlg2').show();" update=":addReglementForm" 
+        				 	 style="background-color:#00b300;" />
+    	</p:column>  -->	
+    	
+    	<p:column headerText="Modifier" width="100" resizable="false">
+        	<p:commandButton value="Modifier" action="#{factMBean.valueFactM(f)}" 
+        				 	 onclick="PF('dlg3').show();" update=":updateFactForm"
+        				 	 style="background-color:#ff6600;" />
+    	</p:column>
+		
+    	<p:column headerText="Supprimer" width="105" resizable="false">
+        	<p:commandButton value="Supprimer" action="#{factMBean.deleteFactM(f)}" 
+        				 	 update="factTable, :messages, :operations" style="background-color:#ff1a1a;">
+        	<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+        	</p:commandButton>
+        	<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" style="font-size:90%;">
+        		<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+        						 icon="ui-icon-check" />
+        		<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+        						 icon="ui-icon-close" />
+			</p:confirmDialog>
+    	</p:column>
+    	
+    	<f:facet name="footer">
+    		<h:panelGrid columns="3" cellpadding="5">
+    			<p:column headerText="Statut" sortBy="#{f.statutFactMois}">
+        		<h:graphicImage rendered="#{factGBean.factureGlobal.montantTTC == factGBean.somme}" 
+        				value="/images/status_true.png" style="margin-left:10px;" />
+       			<h:graphicImage rendered="#{factGBean.factureGlobal.montantTTC != factGBean.somme}" 
+       					value="/images/status_false.png" style="margin-left:10px;" />
+    			</p:column>
+    			<h:outputText value="Montant Facturé: #{factGBean.factureGlobal.montantTTC}€"/>
+    			<h:outputText value="Total règlement: #{factGBean.somme}€" />
+    		</h:panelGrid>
+    	</f:facet>
+   
+</p:dataTable>
+</h:form>
+
+<h:form>
+<h:panelGrid columns="2" cellpadding="5">
+	<h:outputText />	
+	<p:commandButton value="Ajouter facture d'acompte" action="#{factMBean.valueFactG}" 
+					onclick="PF('dlg1').show();" update=":addFactForm" resetValues="true" />
+</h:panelGrid>
+</h:form>
+
+<!-- formulaire add Facture Mois -->
+<p:dialog header="Création Facture" widgetVar="dlg1" modal="true" height="180" closeOnEscape="true"
+			style="font-size:90%;">
+<h:form id="addFactForm">
+<p:focus />
+	<h:panelGrid columns="2" cellpadding="5" style="font-size:90%;">
+		<p:outputLabel for="ref" value="Ref Facture :" />
+		<p:inputText id="ref" value="#{factMBean.factureMois.refFactMois}" />
+		
+		<p:outputLabel for="event" value="Date création :" />
+        <p:calendar id="event" value="#{factMBean.date}">
+            <p:ajax event="dateSelect" listener="#{factMBean.onDateSelect}" update="event" />
+        </p:calendar>
+		
+		<p:outputLabel for="MontantFacture" value="Montant TTC € :" />
+		<h:outputText id="MontantFacture" value="#{factMBean.factureMois.montantFacture}" />
+		
+		<p:outputLabel for="reglement" value="Règlement TTC € :" />
+		<p:inputText id="reglement" value="#{factMBean.reglementClient}" />
+
+		<h:outputText />
+		<p:commandButton value="Créer" action="#{factMBean.createFactM}" 
+						oncomplete="handleDialogSubmit(args,'dlg1');" 
+						update="addFactForm, :messages, :operations"
+						style="background-color:#00b300;" />
+	</h:panelGrid>
+</h:form>
+</p:dialog>
+
+<!-- formulaire add Réglement -->
+<p:dialog header="Ajoute réglement" widgetVar="dlg2" modal="true" height="260" closeOnEscape="true"
+			style="font-size:90%;">
+<h:form id="addReglementForm">
+<p:focus />
+	<h:panelGrid columns="2" cellpadding="5" style="font-size:90%;">
+		<f:facet name="header">Création Devis</f:facet>
+		<p:outputLabel for="ref" value="Ref Facture :" />
+		<h:outputText id="ref" value="#{factMBean.factureMois.refFactMois}" />
+		
+		<p:outputLabel for="event" value="Date création :" />
+        <p:calendar id="event" value="#{factMBean.date}" disabled="true">
+            <p:ajax event="dateSelect" listener="#{factMBean.onDateSelect}" update="event" />
+        </p:calendar>
+		
+		<p:outputLabel for="MontantFacture" value="Montant TTC :" />
+		<h:outputText id="MontantFacture" value="#{factMBean.factureMois.montantFacture}" />
+		
+		<p:outputLabel for="reglement" value="Règlement :" />
+		<p:inputText id="reglement" value="#{factMBean.factureMois.reglement}" />
+		
+		<h:outputText value="Réglement complet :" />
+        <p:selectBooleanCheckbox value="#{factMBean.reglementComplet}">
+            <p:ajax update="addReglementForm" listener="#{factMBean.reglement}" />
+        </p:selectBooleanCheckbox>
+        
+		<h:outputText />
+		<p:commandButton value="Ajouter réglement" action="#{factMBean.addReglement}" oncomplete="handleDialogSubmit(args,'dlg2');" 
+						 update="addReglementForm :messages, :operations" />
+	</h:panelGrid>
+</h:form>
+</p:dialog>
+
+<!-- formulaire update Facture -->
+<p:dialog header="Modifier Facture" widgetVar="dlg3" modal="true" height="180" closeOnEscape="true"
+			style="font-size:90%;">
+<h:form id="updateFactForm">
+<p:focus />
+	<h:panelGrid columns="2" cellpadding="5" style="font-size:90%;">
+
+		<p:outputLabel for="ref" value="Ref Facture :" />
+		<p:inputText id="ref" value="#{factMBean.factureMois.refFactMois}" />
+		
+		<p:outputLabel for="event" value="Date création :" />
+        <p:calendar id="event" value="#{factMBean.date}">
+            <p:ajax event="dateSelect" listener="#{factMBean.onDateSelect}" update="event" />
+        </p:calendar>
+		
+		<p:outputLabel for="MontantFacture" value="Montant TTC € :" />
+		<h:outputText id="MontantFacture" value="#{factMBean.factureMois.montantFacture}" />
+		
+		<p:outputLabel for="reglement" value="Règlement € :" />
+		<p:inputText id="reglement" value="#{factMBean.factureMois.reglement}" />
+		
+		<h:outputText />
+		<p:commandButton value="Modifier" action="#{factMBean.addReglement}" 
+						oncomplete="handleDialogSubmit(args,'dlg3');" 
+						update="updateFactForm :messages, :operations" 
+						style="background-color:#ff6600;" />
+	</h:panelGrid>
+</h:form>
+</p:dialog>
+
+
+	<script type="text/javascript">
+		function handleDialogSubmit(args, dialogName) {
+			if (!args.validationFailed) {
+				PF(dialogName).hide();
+			}
+		}
+	</script>
+
+	<style>
+		.ui-button{
+            font-size:90%;
+        }
+	</style>
+</h:body>
+</html>

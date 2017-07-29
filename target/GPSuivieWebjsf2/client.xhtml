@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Clients</title>
+</h:head>
+<h:body>
+	<!-- Tab Menu -->
+	<p:tabMenu activeIndex="#{param.i}" style="margin-bottom:5px;">
+		<p:menuitem value="Liste clients" outcome="client" icon="ui-icon-person" style="background-color:#ffa64d;">
+			<f:param name="i" value="0" />
+		</p:menuitem>
+		<p:menuitem value="Rapport bug" outcome="rapportBug" icon="ui-icon-wrench" style="background-color:#ffa64d;">
+			<f:param name="i" value="1" />
+		</p:menuitem>
+	</p:tabMenu>
+
+	<!-- Message Display -->
+	<p:growl id="messages" />
+
+	<!-- 	Table list Client -->
+	<h:form id="operations">
+		<p:dataTable id="clientTable" var="c" value="#{clientBean.clients}" resizableColumns="true" 
+					style="margin-bottom:10px;font-size:90%">
+					
+			<f:facet name="header">Liste Client</f:facet>
+
+			<p:column headerText="Statut" sortBy="#{c.statutClient}" width="60">
+				<h:graphicImage rendered="#{c.statutClient eq 'true'}" value="/images/status_true.png" 
+								style="margin-left:10px;" />
+				<h:graphicImage rendered="#{c.statutClient eq 'false'}" value="/images/status_false.png" 
+								style="margin-left:10px;"/>
+			</p:column>
+
+			<p:column headerText="Nom" sortBy="#{c.nom}">
+				<h:outputText value="#{c.nom}" />
+			</p:column>
+
+			<p:column headerText="Prénom" sortBy="#{c.prenom}">
+				<h:outputText value="#{c.prenom}" />
+			</p:column>
+
+			<p:column headerText="Adresse Facturation" sortBy="#{c.adresseFacturation}">
+				<h:outputText value="#{c.adresseFacturation}" />
+			</p:column>
+
+			<p:column headerText="Adresse Chantier" sortBy="#{c.adresseChantier}">
+				<h:outputText value="#{c.adresseChantier}" />
+			</p:column>
+
+			<p:column headerText="E-mail" sortBy="#{c.email}">
+				<h:outputText value="#{c.email}" />
+			</p:column>
+
+			<p:column headerText="N° Tél" sortBy="#{c.numTel}">
+				<h:outputText value="#{c.numTel}" />
+			</p:column>
+
+			<p:column headerText="Consulter" width="115">
+				<p:commandButton value="Consulter" action="#{clientBean.consulterClient(c)}" 
+								style="background-color:#00b300;"/>
+			</p:column>
+			
+			<p:column headerText="Modifier" width="106">
+				<p:commandButton value="Modifier" action="#{clientBean.setClient2(c)}" onclick="PF('dlg1').show();"
+								update=":updateForm" resetValues="true" style="background-color:#ff6600;"/>
+			</p:column>
+			
+			<p:column headerText="Supprimer" width="123">
+				<p:commandButton value="Supprimer" action="#{clientBean.deleteClient(c)}"
+								update="clientTable, :messages" style="background-color:#ff1a1a;">
+					<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+				</p:commandButton>
+				
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" style="font-size:90%;">
+					<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+									icon="ui-icon-check" />
+					<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+									icon="ui-icon-close" />
+				</p:confirmDialog>
+			</p:column>
+			
+		</p:dataTable>
+		
+		<p:commandButton value="Ajouter Client" type="button" onclick="PF('dlg2').show();" 
+						style="margin-left:40px;" />
+	</h:form>
+
+	<!-- formulaire add Client -->
+	<p:dialog header="Créer client" widgetVar="dlg2" modal="true" height="300" closeOnEscape="true" 
+			style="font-size:90%;">
+		<h:form id="addForm">
+			<p:focus />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:outputLabel for="nom" value="Nom :" />
+				<p:inputText id="nom" value="#{clientBean.client3.nom}" />
+
+				<p:outputLabel for="prenom" value="Prénom :" />
+				<p:inputText id="prenom" value="#{clientBean.client3.prenom}" />
+
+				<p:outputLabel for="adresseFacturation" value="Adresse Facturation :" />
+				<p:inputText id="adresseFacturation" value="#{clientBean.client3.adresseFacturation}" />
+
+				<p:outputLabel for="adresseChantier" value="Adresse Chantier :" />
+				<p:inputText id="adresseChantier" value="#{clientBean.client3.adresseChantier}" />
+
+				<p:outputLabel for="email" value="E-mail :" />
+				<p:inputText id="email" value="#{clientBean.client3.email}" />
+
+				<p:outputLabel for="numTel" value="N° Tel :" />
+				<p:inputText id="numTel" value="#{clientBean.client3.numTel}" />
+			</h:panelGrid>
+			
+			<h:panelGrid columns="2" cellpadding="5" style="margin-left:80px;">
+				<p:commandButton value="Ajouter" action="#{clientBean.createClient}"
+								update="addForm, :messages, :operations"
+								oncomplete="handleDialogSubmit(args,'dlg2');" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<!-- formulaire update Client -->
+	<p:dialog header="Modifier client" widgetVar="dlg1" modal="true" height="300" closeOnEscape="true"
+			style="font-size:90%;">
+		<h:form id="updateForm">
+			<p:focus />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:outputLabel for="nom" value="Nom :" />
+				<p:inputText id="nom" value="#{clientBean.client2.nom}" />
+
+				<p:outputLabel for="prenom" value="Prénom :" />
+				<p:inputText id="prenom" value="#{clientBean.client2.prenom}" />
+
+				<p:outputLabel for="adresseFacturation" value="Adresse Facturation :" />
+				<p:inputText id="adresseFacturation" value="#{clientBean.client2.adresseFacturation}" />
+
+				<p:outputLabel for="adresseChantier" value="Adresse Chantier :" />
+				<p:inputText id="adresseChantier" value="#{clientBean.client2.adresseChantier}" />
+
+				<p:outputLabel for="email" value="E-mail :" />
+				<p:inputText id="email" value="#{clientBean.client2.email}" />
+
+				<p:outputLabel for="numTel" value="N° Tel :" />
+				<p:inputText id="numTel" value="#{clientBean.client2.numTel}" />
+
+				<p:outputLabel />
+				<p:commandButton value="Modifier" action="#{clientBean.updateClient}"
+								update="updateForm, :messages, :operations"
+								oncomplete="handleDialogSubmit(args,'dlg1');"/>
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<script type="text/javascript">
+		function handleDialogSubmit(args, dialogName) {
+			if (!args.validationFailed) {
+				PF(dialogName).hide();
+			}
+		}
+	</script>
+	<style>
+		.ui-button{
+            font-size:90%;
+        }
+	</style>
+<!--  rowStyleClass="#{c.statutClient eq 'false' ? 'odd' : null}" -->
+	<!-- <style type="text/css"> -->
+	<!--    .odd {  -->
+	<!--      background-color: #ff6666;  -->
+	<!--      color: #FFFFFF;   -->
+	<!--    }  -->
+	<!-- </style> -->
+</h:body>
+</html>

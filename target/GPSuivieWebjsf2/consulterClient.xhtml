@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Devis / Factures</title>
+</h:head>
+<h:body>
+	<!-- menu -->
+	<p:tabMenu id="tabMenu" activeIndex="#{param.i}">
+		<p:menuitem value="Liste clients" outcome="client" icon="ui-icon-person" style="background-color:#ffa64d;">
+			<f:param name="i" value="0" />
+		</p:menuitem>
+		<p:menuitem value="Rapport bug" outcome="rapportBug" icon="ui-icon-wrench" style="background-color:#ffa64d;">
+			<f:param name="i" value="1" />
+		</p:menuitem>
+	</p:tabMenu>
+
+	<h4>
+		Client :
+		<h:outputText value="#{clientBean.client}" />
+	</h4>
+
+	<!-- message display -->
+	<p:growl id="messages" />
+
+	<!-- 	Table liste Devis -->
+	<h:form id="operations">
+		<p:dataTable id="devisTable" var="d" value="#{clientBean.listDevis}" resizableColumns="true" 
+					style="margin-bottom:10px; font-size:90%;">
+
+			<f:facet name="header">Liste Devis</f:facet>
+
+			<p:column headerText="Date création" sortBy="#{d.dateCreation}" width="120">
+				<h:outputText value="#{devisBean.onDateInput(d.dateCreation)}" />
+			</p:column>
+
+			<p:column headerText="Ref Devis" sortBy="#{d.ref}" width="130">
+				<h:outputText value="#{d.ref}" />
+			</p:column>
+
+			<p:column headerText="Montant HT" sortBy="#{d.montantHT}" width="105">
+				<h:outputText value="#{d.montantHT}" />
+			</p:column>
+
+			<p:column headerText="Taux TVA" sortBy="#{d.tauxTva}" width="90">
+				<h:outputText value="#{d.tauxTva}" />
+			</p:column>
+
+			<p:column headerText="Montant TTC" sortBy="#{d.montantTTC}" width="120">
+				<h:outputText value="#{d.montantTTC}" />
+			</p:column>
+
+			<p:column headerText="Client" sortBy="#{d.client.nom}" width="150">
+				<h:outputText value="#{d.client.nom} #{d.client.prenom}" />
+			</p:column>
+
+			<p:column headerText="Valider" width="84">
+				<p:commandButton value="Valider" action="#{factGBean.validerDevis(d)}" 
+								onclick="PF('dlg2').show();" update=":validerForm" 
+								style="background-color:#00b300;" />
+			</p:column>
+
+			<p:column headerText="Modifier" width="94">
+				<p:commandButton value="Modifier" action="#{devisBean.valueDevis(d)}" 
+								onclick="PF('dlg3').show();" update=":updateActuDevisForm" 
+								style="background-color:#ff6600;" />
+			</p:column>
+
+			<p:column headerText="Supprimer" width="110">
+				<p:commandButton value="Supprimer" action="#{devisBean.deleteDevis(d)}" 
+								update="devisTable, :messages" style="background-color:#ff1a1a;">
+					<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+				</p:commandButton>
+				
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+					<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+									icon="ui-icon-check" />
+					<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+									icon="ui-icon-close" />
+				</p:confirmDialog>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+
+	<!-- 	Bouton Add Devis -->
+	<h:form>
+		<p:commandButton value="Ajouter Devis" onclick="PF('dlg1').show();" style="margin-left:40px;" />
+	</h:form>
+	<br />
+
+	<!-- 	Table liste FactureGlobal -->
+	<h:form id="operationsFact">
+		<p:dataTable id="factGTable" var="f" value="#{clientBean.listFactG}"
+			resizableColumns="true" style="margin-bottom:20px; font-size:90%;">
+
+			<f:facet name="header">Liste Factures</f:facet>
+
+			<p:column headerText="Statut" sortBy="#{f.statutFactG}" width="60">
+				<h:graphicImage rendered="#{f.statutFactG eq 'true'}" value="/images/status_true.png" 
+								style="margin-left:10px;" />
+       			<h:graphicImage rendered="#{f.statutFactG eq 'false'}" value="/images/status_false.png" 
+       							style="margin-left:10px;"/>
+			</p:column>
+
+			<p:column headerText="Date création" sortBy="#{f.dateCreation}">
+				<h:outputText value="#{devisBean.onDateInput(f.dateCreation)}" />
+			</p:column>
+
+			<p:column headerText="Ref Facture" sortBy="#{f.ref}">
+				<h:outputText value="#{f.ref}" />
+			</p:column>
+
+			<p:column headerText="Montant HT" sortBy="#{f.montantHT}">
+				<h:outputText value="#{f.montantHT}" />
+			</p:column>
+
+			<p:column headerText="Taux TVA" sortBy="#{f.tauxTva}">
+				<h:outputText value="#{f.tauxTva}" />
+			</p:column>
+
+			<p:column headerText="Montant TTC" sortBy="#{f.montantTTC}">
+				<h:outputText value="#{f.montantTTC}" />
+			</p:column>
+
+			<p:column headerText="Devis" sortBy="#{f.devis.ref}">
+				<h:outputText value="#{f.devis.ref}" />
+			</p:column>
+
+			<p:column headerText="Facture Détaillé">
+				<p:commandButton value="Créer" action="#{factGBean.consulterFactG(f)}" 
+								style="background-color:#00b300; margin-left:30px;"/>
+			</p:column>
+
+			<p:column headerText="Supprimer" width="125">
+				<p:commandButton value="Supprimer" action="#{factGBean.deleteFactG(f)}" 
+								update="factGTable, :messages" style="background-color:#ff1a1a;">
+					<p:confirm header="Confirmation" message="Etes-vous sûr?" icon="ui-icon-alert" />
+				</p:commandButton>
+				
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" style="font-size:90%;">
+					<p:commandButton value="Oui" type="button" styleClass="ui-confirmdialog-yes" 
+									icon="ui-icon-check" />
+					<p:commandButton value="Non" type="button" styleClass="ui-confirmdialog-no" 
+									icon="ui-icon-close" />
+				</p:confirmDialog>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+
+	<!-- formulaire add Devis -->
+	<p:dialog header="Création Devis" widgetVar="dlg1" modal="true" height="220" closeOnEscape="true"
+			style="font-size:90%;">
+		<h:form id="addDevisForm">
+			<p:focus />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:outputLabel for="ref" value="Ref Devis :" />
+				<p:inputText id="ref" value="#{devisBean.devis2.ref}" />
+
+				<p:outputLabel for="event" value="Date création :" />
+				<p:calendar id="event" value="#{devisBean.date}">
+					<p:ajax event="dateSelect" listener="#{devisBean.onDateSelect}"
+							update="event" />
+				</p:calendar>
+
+				<p:outputLabel for="montantHT" value="Montant HT :" />
+				<p:inputText id="montantHT" value="#{devisBean.devis2.montantHT}" />
+
+				<p:outputLabel for="tauxTva" value="Taux TVA :" />
+				<p:selectOneMenu id="tauxTva" value="#{devisBean.devis2.tauxTva}" style="width:140px">
+					<f:selectItem itemLabel="Sélection" itemValue="" />
+					<f:selectItem itemLabel="5.5 %" itemValue="5.5" />
+					<f:selectItem itemLabel="10 %" itemValue="10.0" />
+					<f:selectItem itemLabel="20 %" itemValue="20.0" />
+				</p:selectOneMenu>
+
+				<p:outputLabel />
+				<p:commandButton value="Créer Devis" action="#{devisBean.createDevis}"
+					update="addDevisForm, :messages, :operations"
+					oncomplete="handleDialogSubmit(args,'dlg1');" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<!-- Dialog validation Devis into creation FactureGlobal -->
+	<p:dialog header="Valider Devis" widgetVar="dlg2" modal="true" height="220" closeOnEscape="true"
+			style="font-size:90%;">
+		<h:form id="validerForm">
+			<p:focus />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:outputLabel for="ref" value="Ref Facture :" />
+				<p:inputText id="ref" value="#{factGBean.factureGlobal.ref}" />
+
+				<p:outputLabel for="event" value="Date création :" />
+				<p:calendar id="event" value="#{factGBean.date}">
+					<p:ajax event="dateSelect" listener="#{factGBean.onDateSelect}" update="event" />
+				</p:calendar>
+
+				<p:outputLabel for="montantHT" value="Montant HT :" />
+				<p:inputText id="montantHT" value="#{factGBean.factureGlobal.montantHT}" />
+
+				<p:outputLabel for="tauxTva" value="Taux TVA :" />
+				<p:selectOneMenu id="tauxTva" value="#{factGBean.factureGlobal.tauxTva}" style="width:140px">
+					<f:selectItem itemLabel="Sélection" itemValue="" />
+					<f:selectItem itemLabel="5.5 %" itemValue="5.5" />
+					<f:selectItem itemLabel="10 %" itemValue="10.0" />
+					<f:selectItem itemLabel="20 %" itemValue="20.0" />
+				</p:selectOneMenu>
+
+				<p:outputLabel />
+				<p:commandButton value="Valider Devis" action="#{factGBean.createFacture}"
+								update="validerForm, :operationsFact, :messages"
+								oncomplete="handleDialogSubmit(args,'dlg2');" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<!-- formulaire Update/actualisation Devis -->
+	<p:dialog header="Modifier / Actualiser Devis" widgetVar="dlg3" modal="true" height="220" 
+			closeOnEscape="true">
+		<h:form id="updateActuDevisForm" style="font-size:90%;">
+			<p:focus />
+			<h:panelGrid columns="2" cellpadding="5">
+				<p:outputLabel for="ref" value="Ref Devis :" />
+				<p:inputText id="ref" value="#{devisBean.devis.ref}" />
+
+				<p:outputLabel for="event" value="Date création :" />
+				<p:calendar id="event" value="#{devisBean.date}">
+					<p:ajax event="dateSelect" listener="#{devisBean.onDateSelect}" update="event" />
+				</p:calendar>
+
+				<p:outputLabel for="montantHT" value="Montant HT :" />
+				<p:inputText id="montantHT" value="#{devisBean.devis.montantHT}" />
+
+				<p:outputLabel for="tauxTva" value="Taux TVA :" />
+				<p:selectOneMenu id="tauxTva" value="#{devisBean.devis.tauxTva}" style="width:140px">
+					<f:selectItem itemLabel="Sélection" itemValue="" />
+					<f:selectItem itemLabel="5.5 %" itemValue="5.5" />
+					<f:selectItem itemLabel="10 %" itemValue="10.0" />
+					<f:selectItem itemLabel="20 %" itemValue="20.0" />
+				</p:selectOneMenu>
+
+				<p:commandButton value="Modifier Devis" action="#{devisBean.updateDevis}"
+								update="updateActuDevisForm, :messages, :operations"
+								oncomplete="handleDialogSubmit(args,'dlg3');" />
+				<p:commandButton value="Actualiser Devis" action="#{devisBean.actualiserDevis}"
+								update="updateActuDevisForm, :messages, :operations"
+								oncomplete="handleDialogSubmit(args,'dlg3');" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+
+	<style>
+		.ui-button{
+            font-size:90%;
+        }
+	</style>
+	<script type="text/javascript">
+		function handleDialogSubmit(args, dialogName) {
+			if (!args.validationFailed) {
+				PF(dialogName).hide();
+			}
+		}
+	</script>
+</h:body>
+</html>
